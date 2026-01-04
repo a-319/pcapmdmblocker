@@ -13,84 +13,180 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_horizontal">
-            <TextView
-                android:id="@+id/act_stat_tvappname"
+            <!--LinearLayout 
+                android:background="@drawable/card_background"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/pcapdroid_app_name"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:gravity="center"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"/>
+                android:orientation="vertical" 
+                android:padding="16dp"
+                android:layout_margin="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView android:text="ניקוי חשבונות" 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold" 
+                    android:textSize="18sp" />
+                <TextView 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="יש להסיר חשבונות גוגל מהמכשיר לפני ההפעלה." 
+                    android:textSize="14sp" />
+                <Button 
+                    android:background="@drawable/rounded_button_background"
+                    android:padding="14dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btn_open_accounts"
+                    android:text="עבור להגדרות חשבון" 
+                    android:layout_marginTop="8dp" />
+            </LinearLayout-->
             <ImageView
-                android:src="@drawable/ic_launcher"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"/>
-
-            <TextView
-                android:id="@+id/act_stat_tvstate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="state"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-            <TextView
-                android:id="@+id/act_stat_tvtinst"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="time install"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-            <TextView
-                android:id="@+id/act_stat_tvtlogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="time login"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="(צריך להשבית שינוי תאריך ושעה!)"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:gravity="center"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#DDDDDD"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="24dp"/>
+                android:id="@+id/mdm_shield_view"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:padding="15dp"
+                android:src="@drawable/mdm_shield_perfect_final" />
             <LinearLayout
-                android:id="@+id/act_stat_linlactivate"
+                android:id="@+id/act_stat_info"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_horizontal">
-                <Button
-                    android:id="@+id/act_stat_bucpcmd"
+                android:padding="16dp"
+                android:gravity="center"
+                android:visibility="gone"
+            >
+                
+                <!--ImageView
+                    android:src="@drawable/ic_launcher"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"/-->
+                
+                <TextView
+                    android:id="@+id/act_stat_tvappname"
                     android:layout_width="wrap_content"
-                    style="@style/MDMActionButton"
-                    android:background="@drawable/rounded_button_background"
-                    android:text="@string/bucpcmd"/>
+                    android:layout_height="wrap_content"
+                    android:text="@string/pcapdroid_app_name"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"/>
+                <TextView
+                    android:id="@+id/act_stat_tvstate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="state"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp" />
+                <TextView
+                    android:id="@+id/act_stat_tvtinst"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="time install"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp" />
+                <TextView
+                    android:id="@+id/act_stat_tvtlogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="time login"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(צריך להשבית שינוי תאריך ושעה!)"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp" />
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#DDDDDD"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="24dp"/>
-                <Button
-                    android:id="@+id/act_stat_bucert"
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/act_stat_identa"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="32dp"
+                android:gravity="center"
+                android:visibility="visible"
+            >
+                <!--TextView
                     android:layout_width="wrap_content"
-                    style="@style/MDMActionButton"
-                    android:background="@drawable/rounded_button_background"
-                    android:text="התקנת מודל תעודת אבטחה לנטפרי!"/>
+                    android:layout_height="wrap_content"
+                    android:text="🛡️"
+                    android:textSize="80sp"
+                    android:layout_marginBottom="24dp"/-->
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ברוך הבא!"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                   
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="חסימת MDM"
+                    android:textSize="20sp"
+                  
+                    android:layout_marginBottom="40dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="השירות עדיין לא הופעל.\nכדי להגן על המכשיר, יש צורך במתן הרשאת ADB."
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    
+                    android:lineSpacingExtra="4dp"
+                    android:layout_marginBottom="40dp"/>
+
+                <TextView
+                    android:id="@+id/welcomeidentify"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textIsSelectable="true"
+                    android:text="המכשיר שזוהה - "
+                    android:textSize="16sp"
+                    android:gravity="center"
+                  
+                    android:lineSpacingExtra="4dp"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/act_stat_linlbefact"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp"
+                android:gravity="center_horizontal">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#DDDDDD"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="הכנת המכשיר"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -122,17 +218,119 @@
                     android:background="@drawable/rounded_button_background"
                     android:text="@string/budev"/>
                 <Button
-                    android:id="@+id/act_stat_buaccount"
-                    android:layout_width="wrap_content"
-                    style="@style/MDMActionButton"
-                    android:background="@drawable/rounded_button_background"
-                    android:text="@string/buaccount"/>
-                <Button
                     android:id="@+id/act_stat_bucppwd"
                     android:layout_width="wrap_content"
                     style="@style/MDMActionButton"
                     android:background="@drawable/rounded_button_background"
                     android:text="@string/bucppwd"/>
+                <Button
+                    android:id="@+id/act_stat_buaccount"
+                    android:layout_width="wrap_content"
+                    style="@style/MDMActionButton"
+                    android:background="@drawable/rounded_button_background"
+                    android:text="@string/buaccount"/>
+                
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#DDDDDD"
+                    android:layout_marginTop="24dp"
+                    />
+            </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/act_stat_identb"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="32dp"
+                    android:gravity="center"
+                    android:visibility="visible"
+                >
+                    <LinearLayout
+                        android:id="@+id/act_stat_linlactivate_mult"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/card_bg"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:elevation="4dp"
+                        android:layout_marginBottom="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="✨ המלצה עבור המכשיר שלך"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_recommended_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="הפעלה קלה על מכשיר מולטימדיה"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/tv_recommended_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="זיהינו שמדובר במערכת מולטימדיה. זו הדרך המהירה והבטוחה ביותר עבורך."
+                            android:layout_marginTop="4dp"/>
+                        <Button
+                            android:id="@+id/btn_activate_mult"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="התחל הפעלה מומלצת"
+                            android:background="@drawable/rounded_button_background_reverse"
+                            android:textColor="?colorBackItem"/>
+                    </LinearLayout>
+                <!--LinearLayout 
+                    android:background="@drawable/card_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" 
+                    android:padding="16dp"
+                    android:layout_margin="16dp"
+                    android:id="@+id/act_stat_linlactivate_mult"
+                    android:visibility="visible"
+                    android:layout_marginBottom="12dp">
+                    <TextView 
+                        android:text="הפעלת החסימה למולטימדיה או קוביית אנדרואיד" 
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold" 
+                        android:textSize="18sp" />
+                    <TextView 
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="מפעיל את החסימה על ידי השבתת חשבונות, הפעלת החסימה, והפעלת חשבונות." 
+                        android:textSize="14sp" />
+                    <Button 
+                        android:background="@drawable/rounded_button_background"
+                        android:padding="14dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btn_activate_mult"
+                        android:text="עבור להפעלה!"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout-->
+                <Button
+                    android:id="@+id/btn_next_start"
+                    android:layout_width="wrap_content"
+                    style="@style/MDMActionButton"
+                    android:text="מתחילים"
+                    android:background="@drawable/rounded_button_background"/>
+            </LinearLayout>
+            
+            
+                <LinearLayout
+                    android:id="@+id/act_stat_linlactivate"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="16dp"
+                    android:gravity="center_horizontal">
                 <Button
                     android:id="@+id/act_stat_buadbmult"
                     android:layout_width="wrap_content"
@@ -190,6 +388,30 @@
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="24dp"/>
                 <Button
+                    android:id="@+id/act_stat_bucpcmd"
+                    android:layout_width="wrap_content"
+                    style="@style/MDMActionButton"
+                    android:background="@drawable/rounded_button_background"
+                    android:text="@string/bucpcmd"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#DDDDDD"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"/>
+                <Button
+                    android:id="@+id/act_stat_bucert"
+                    android:layout_width="wrap_content"
+                    style="@style/MDMActionButton"
+                    android:background="@drawable/rounded_button_background"
+                    android:text="התקנת מודל תעודת אבטחה לנטפרי!"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#DDDDDD"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"/>
+                <Button
                     android:id="@+id/act_stat_bustartroot"
                     android:layout_width="wrap_content"
                     style="@style/MDMActionButton"
@@ -212,6 +434,7 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:padding="16dp"
                 android:gravity="center_horizontal">
                 <TextView
                     android:id="@+id/act_stat_tvroute"
@@ -237,5 +460,6 @@
                     android:layout_marginBottom="5dp" />
             </LinearLayout>
         </LinearLayout>
+      
     </ScrollView>
 </LinearLayout>

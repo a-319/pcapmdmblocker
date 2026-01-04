@@ -54,6 +54,18 @@ import com.emanuelef.remote_capture.CaptureService;
 import com.emanuelef.remote_capture.R;
 import android.preference.PreferenceManager;
 import com.emanuelef.remote_capture.PCAPdroid;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.TrustManager;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertificateException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import java.net.URL;
+import java.io.FileOutputStream;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Deprecated
 public class MDMSettingsActivity extends Activity {
@@ -224,7 +236,7 @@ public class MDMSettingsActivity extends Activity {
                 mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_INSTALL_APPS);//all!
                 mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_CONFIG_WIFI);
                 mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_SAFE_BOOT);
-                
+                //mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_CONFIG_VPN);
                 
                 //mDpm.setApplicationHidden(mAdminComponentName, "com.dofun.carsetting", true);//carsettings
                 mDpm.setApplicationHidden(mAdminComponentName, "com.android.vending", true);//Google play
@@ -261,7 +273,7 @@ public class MDMSettingsActivity extends Activity {
                 mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_INSTALL_APPS);//all!
                 mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_CONFIG_WIFI);
                 mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_SAFE_BOOT);
-                
+                //mDpm.addUserRestriction(mAdminComponentName, UserManager.DISALLOW_CONFIG_VPN);
                 
                 mDpm.setApplicationHidden(mAdminComponentName, "com.android.vending", true);//Google play
                 mDpm.setApplicationHidden(mAdminComponentName, "com.android.chrome", true);//chrome
@@ -444,8 +456,10 @@ public class MDMSettingsActivity extends Activity {
           Toast.makeText(getApplicationContext(), "" + e, 0).show();
       }
       try{
-         startDownload(which);
+         //startDownload(which);
+          startDownloadnew(which);
       } catch (Exception e) {
+          LogUtil.logToFile(e.toString());
           Toast.makeText(getApplicationContext(), "" + e, 0).show();
       }
         /*
@@ -685,7 +699,229 @@ public class MDMSettingsActivity extends Activity {
         }
         }
     };
+    private void startDownloadnew(String which) {
+        String uri;
+        if(which.equals("old")){
+            uri = "https://raw.githubusercontent.com/efraimzz/whitelist/refs/heads/main/whitelistbetaold.apk";
+        }else{
+            uri = "https://raw.githubusercontent.com/efraimzz/whitelist/refs/heads/main/whitelistbeta.apk";
+        }
+        
+        // הגדר כותרת ותיאור עבור ההתראה
+        
+        new File(getExternalFilesDir("")+"/updatebeta.apk").delete();
+        String destinationFile = getExternalFilesDir("")+"/updatebeta.apk";
+        
+        // אפס את דגל הביטול לפני התחלת הורדה חדשה
+        isDownloadCanceled = false;
+        
+        startDownload(MDMSettingsActivity.this, uri, destinationFile, new Runnable(){
 
+                @Override
+                public void run() {
+                    
+                }
+            }, new Runnable(){
+
+                @Override
+                public void run() {
+                }
+            });
+        // הכנס את ההורדה לתור וקבל את מזהה ההורדה
+        
+        showProgressDialognew(uri);
+    }
+    @Deprecated
+    private void showProgressDialognew(final String fileurl) {
+        progressDialog = new ProgressDialog(MDMSettingsActivity.this);
+        progressDialog.setTitle("הורדת קובץ");
+        progressDialog.setMessage("מתחיל הורדה...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setCancelable(false); // המשתמש אינו יכול לבטל אותו (דרך כפתור החזרה)
+
+        // הוספת כפתור שלילי (ביטול) לדיאלוג
+        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "ביטול", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // סמן שההורדה בוטלה על ידי המשתמש
+                    isDownloadCanceled = true;
+                    // ביטול ההורדה באמצעות DownloadManager
+                    //downloadManager.remove(downloadId);
+                    cancelDownload(fileurl);
+                    // עצור את עדכון ההתקדמות
+                    handler.removeCallbacks(updateProgressRunnable);
+                    // סגור את הדיאלוג
+                    dialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "ההורדה בוטלה.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        progressDialog.show();
+
+        updateProgressRunnable = new Runnable() {
+            @Deprecated
+            @Override
+            public void run() {
+                // אם ההורדה כבר בוטלה על ידי המשתמש, אין צורך להמשיך לעדכן
+                if (isDownloadCanceled) {
+                    handler.removeCallbacks(this);
+                    return;
+                }
+                   // int status = cursor.getInt(statusColumnIndex);
+                    long bytesDownloaded = total;
+                    long totalBytes = fileLength;
+
+                    if (totalBytes > 0) {
+                        int progress = (int) ((bytesDownloaded * 100) / totalBytes);
+                        progressDialog.setProgress(progress);
+                        progressDialog.setMessage("הורדה: " + progress + "%");
+                    }
+
+                    // אם ההורדה הושלמה בהצלחה או נכשלה, הפסק לעדכן
+                    if (totalBytes==bytesDownloaded&&totalBytes!=0) {
+                        handler.removeCallbacks(this); // הפסק לעדכן התקדמות
+                        progressDialog.dismiss();
+                        appone(getExternalFilesDir("")+"/updatebeta.apk");
+                    } else {
+                        handler.postDelayed(this, 1000); // עדכן כל שנייה
+                    }
+                    
+            }
+        };
+        handler.post(updateProgressRunnable); // התחל את עדכון ההתקדמות
+    }
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
+    private static final ConcurrentHashMap<String, HttpsURLConnection> connections = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Boolean> canceledDownloads = new ConcurrentHashMap<>();
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    public static void startDownload(final Context context, final String fileurl, final String filename, final Runnable runonsuc, final Runnable runonfail) {
+        if (connections.containsKey(fileurl)) {
+            LogUtil.logToFile("Download already in progress for: " + fileurl);
+            return;
+        }
+
+        canceledDownloads.put(fileurl, false);
+
+        executor.submit(new Runnable() {
+                // @Override
+                public void run() {
+                    boolean success = manualDownload(context, fileurl, filename);
+
+                    canceledDownloads.remove(fileurl);
+
+                    final Runnable resultRunner = success ? runonsuc : runonfail;
+                    mainHandler.post(resultRunner);
+                }
+            });
+    }
+    static int fileLength=0;
+    static int total = 0;
+    private static boolean manualDownload(final Context context, final String fileurl, final String filename) {
+        InputStream input = null;
+        OutputStream output = null;
+        HttpsURLConnection connection = null;
+        boolean downloadSuccess = false;
+
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    @Override public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
+                    @Override public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
+                }
+            };
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+            URL url = new URL(fileurl);
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setSSLSocketFactory(sslSocketFactory);
+            connection.setRequestProperty("Connection", "Close");
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(15000);
+            connections.put(fileurl, connection);
+            connection.connect();
+
+            if (connection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+                final int responseCode = connection.getResponseCode();
+                mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            LogUtil.logToFile("Server error: " + responseCode);
+                        }
+                    });
+                return false;
+            }
+
+            fileLength = connection.getContentLength();
+            input = connection.getInputStream();
+            output = new FileOutputStream(filename + ".tmp");
+            byte[] data = new byte[4096];
+            total = 0;
+            int count;
+
+            while ((count = input.read(data)) != -1) {
+                if (canceledDownloads.getOrDefault(fileurl, false)) {
+                    mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                LogUtil.logToFile("Download canceled for: " + fileurl);
+                            }
+                        });
+                    break;
+                }
+                total += count;
+                output.write(data, 0, count);
+            }
+            output.flush();
+
+            if (!canceledDownloads.getOrDefault(fileurl, false)) {
+                downloadSuccess = true;
+                File tempFile = new File(filename + ".tmp");
+                if (tempFile.exists()) {
+                    tempFile.renameTo(new File(filename));
+                }
+                mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            LogUtil.logToFile("Download succeeded for: " + fileurl);
+                        }
+                    });
+            } else {
+                File file = new File(filename + ".tmp");
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+        } catch (Exception e) {
+            final String errorMessage = "Download error for " + fileurl + ": " + e.getMessage();
+            mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        LogUtil.logToFile(errorMessage);
+                    }
+                });
+        } finally {
+            try {
+                if (output != null) output.close();
+                if (input != null) input.close();
+                if (connection != null) connection.disconnect();
+            } catch (Exception ignored) { }
+            connections.remove(fileurl);
+        }
+        return downloadSuccess;
+    }
+public static void cancelDownload(String fileurl) {
+        if (canceledDownloads.containsKey(fileurl)) {
+            canceledDownloads.put(fileurl, true);
+        }
+        HttpsURLConnection connection = connections.get(fileurl);
+        if (connection != null) {
+            connection.disconnect();
+        }
+    }
+    
     private void installApk(String fileUriString) {
         if (fileUriString == null) {
             Toast.makeText(getApplicationContext(), "קובץ לא נמצא להתקנה.", Toast.LENGTH_SHORT).show();

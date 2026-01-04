@@ -4,6 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
+    <LinearLayout
+        android:id="@+id/act_adbpair_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <ScrollView
         android:id="@+id/outputScrollView"
         android:layout_width="match_parent"
@@ -139,7 +144,14 @@
             android:layout_marginTop="8dp" />
     </LinearLayout>
     </HorizontalScrollView>
-    
+        </LinearLayout>
+    </ScrollView>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/act_adbpair_out"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <ScrollView
         android:id="@+id/outputScrollView"
         android:layout_width="match_parent"
@@ -155,5 +167,5 @@
 
     </ScrollView>
         </LinearLayout>
-    </ScrollView>
+   
 </LinearLayout>

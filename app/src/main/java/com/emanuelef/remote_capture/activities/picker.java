@@ -28,6 +28,9 @@ import com.emanuelef.remote_capture.fragments.BlacklistsFragment;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.emanuelef.remote_capture.Utils;
+import android.widget.Button;
+import android.view.View.OnClickListener;
+import com.mdm.activities.storeActivity;
 
 public class picker extends Activity { 
 
@@ -38,6 +41,7 @@ public class picker extends Activity {
     String from="";
     //final ReentrantLock mLock = new ReentrantLock();
     private SharedPreferences mPrefs;
+    Button bupickerselect;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +88,22 @@ public class picker extends Activity {
              final FileAdapter adapter = new FileAdapter(this, fileList); // Assume fileList is loaded
              listView.setAdapter(adapter);
              */
+             
+            bupickerselect=findViewById(R.id.bupickerselect);
+            if(from.equals("storeseldir")){
+                bupickerselect.setVisibility(Button.VISIBLE);
+            }
+            bupickerselect.setOnClickListener(new OnClickListener(){
+                    @Override
+                    public void onClick(View p1) {
+                        if(new File(mpath).canRead()&&!mpath.equals("/storage")){
+                            //answar the dir path to save the json
+                                storeActivity.pickeddirpath=mpath;
+                                finish();
+                            
+                        }
+                    }
+                });
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Deprecated
                     @Override
@@ -109,15 +129,21 @@ public class picker extends Activity {
                             }
                             } else if(from.equals("blf")){
                                 if(clickedItem.path.toLowerCase().endsWith(".txt")){
-                                BlacklistsFragment.blpickedfilepath=clickedItem.path;
-                                finish();
-                            }
-                            }
+                                    BlacklistsFragment.blpickedfilepath=clickedItem.path;
+                                    finish();
+                                }
+                            }else if(from.equals("storepickjson")){
+                                if(clickedItem.path.toLowerCase().endsWith(".json")){
+                                    storeActivity.pickedfilepath=clickedItem.path;
+                                    finish();
+                                }
+                             }
                             //Toast.makeText(getApplicationContext(), "Path: " + clickedItem.path, Toast.LENGTH_LONG).show();
                         }
 
                     }
                 });
+            
         } catch (Exception e) {
             LogUtil.logToFile(e.toString());
             Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();

@@ -76,6 +76,18 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import com.mdm.activities.storeActivity;
+import android.app.PendingIntent;
+import android.app.AlarmManager;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
+import android.animation.ObjectAnimator;
+import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.LayerDrawable;
+import android.animation.PropertyValuesHolder;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.preference.PreferenceManager;
 
 @Deprecated
 public class MDMStatusActivity extends Activity {
@@ -86,9 +98,9 @@ public class MDMStatusActivity extends Activity {
     SharedPreferences.Editor spe;
     public static final String modesp="mode";
     public static final String locksp="lock";
-    LinearLayout linlactivate,linldetails;
+    LinearLayout linlidenta,linlidentb,linlbefact,linlactivatemult,linlinfo,linlactivate,linldetails;
     TextView tvappname,tvstate,tvtinst,tvtlogin,tvroute,tvdescription,tvremoveroot,tvstartbarcode;
-    Button bucpcmd,bucert,bucppwd,buinstruction,budeviceinfo,budev,buaccount,busavebarcode,bustartroot,buadbmult,buadbwifi,buqrmdm;
+    Button buactivatemult,bucpcmd,bucert,bucppwd,buinstruction,budeviceinfo,budev,buaccount,busavebarcode,bustartroot,buadbmult,buadbwifi,buqrmdm;
     ImageView ivbarcode;
     Bitmap bmp;
     InputStream is;
@@ -142,10 +154,17 @@ public class MDMStatusActivity extends Activity {
             }
         }
         }catch(Exception e){}
+        linlidenta=findViewById(R.id.act_stat_identa);
+        linlidentb=findViewById(R.id.act_stat_identb);
+        linlbefact=findViewById(R.id.act_stat_linlbefact);
+        linlactivatemult=findViewById(R.id.act_stat_linlactivate_mult);
+        buactivatemult=findViewById(R.id.btn_activate_mult);
+        linlinfo=findViewById(R.id.act_stat_info);
         tvappname=findViewById(R.id.act_stat_tvappname);
         tvstate=findViewById(R.id.act_stat_tvstate);
         tvtinst=findViewById(R.id.act_stat_tvtinst);
         tvtlogin=findViewById(R.id.act_stat_tvtlogin);
+        
         linlactivate=findViewById(R.id.act_stat_linlactivate);
         linldetails=findViewById(R.id.act_stat_linldetails);
         bucpcmd=findViewById(R.id.act_stat_bucpcmd);
@@ -167,6 +186,15 @@ public class MDMStatusActivity extends Activity {
         tvdescription=findViewById(R.id.act_stat_tvdescription);
         
         tvappname.setText(getResources().getString(R.string.pcapdroid_app_name)+"\n"+Utils.getAppVersion(this));
+        
+        buactivatemult.setOnClickListener(new OnClickListener(){
+                @Deprecated
+                @Override
+                public void onClick(View p1) {
+                    Intent intent = new Intent(MDMStatusActivity.this, activityadbpair.class).putExtra("butt","disactenaccmult");
+                    startActivity(intent);
+                }
+            });
         
         bucpcmd.setOnClickListener(new OnClickListener(){
                 @Deprecated
@@ -376,6 +404,158 @@ public class MDMStatusActivity extends Activity {
         refresh();
         
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(sp.getBoolean("needChange",false)){
+            changeIconAndForceRestart(mDpm.isDeviceOwnerApp(getPackageName()));
+        }
+    }
+    private void checkAndFixLauncherIcon(boolean isActive) {
+        // // 1. נניח שיש לך משתנה או פונקציה שבודקת אם ה-MDM פעיל באמת
+        boolean isMdmActuallyActive = isActive; 
+
+        PackageManager pm = getPackageManager();
+
+        // // 2. הגדרת רכיבי ה-Alias (זוכר את השרשור: ירוק ואדום)
+        ComponentName greenAlias = new ComponentName(this, "com.emanuelef.remote_capture.LauncherGreen");
+        ComponentName redAlias = new ComponentName(this, "com.emanuelef.remote_capture.LauncherRed");
+
+        // // 3. בדיקה איזה Alias מופעל כרגע במערכת
+        int greenState = pm.getComponentEnabledSetting(greenAlias);
+        int redState = pm.getComponentEnabledSetting(redAlias);
+
+        // // 4. לוגיקת בדיקה ותיקון
+        if (isMdmActuallyActive) {
+            // // אם ה-MDM פעיל אבל האייקון הירוק לא מוגדר כ-Enabled
+            if (greenState != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                /*
+                 // // תיקון: הפעלת ירוק וכיבוי אדום
+                 pm.setComponentEnabledSetting(greenAlias, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                 pm.setComponentEnabledSetting(redAlias, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                 // // הערה: זה עלול לגרום לסגירה רגעית של האפליקציה כפי שדיברנו
+                 */
+                spe.putBoolean("needChange",true).commit();
+            }
+        } else {
+            // // אם ה-MDM כבוי אבל האייקון האדום לא מוגדר כ-Enabled
+            if (redState != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                /*
+                 // // תיקון: הפעלת אדום וכיבוי ירוק
+                 pm.setComponentEnabledSetting(redAlias, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                 pm.setComponentEnabledSetting(greenAlias, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                 */
+                spe.putBoolean("needChange",true).commit();
+            }
+        }
+    }
+
+// // פונקציית עזר לבדיקת הסטטוס האמיתי (למשל מתוך ה-DeviceAdmin או SharedPreferences)
+
+    // // פונקציה להחלפת אייקון והפעלה מחדש עוקפת חסימות
+    public void changeIconAndForceRestart(boolean isActive) {
+        Context context = getApplicationContext();
+        PackageManager pm = context.getPackageManager();
+
+        ComponentName greenAlias = new ComponentName(context, "com.emanuelef.remote_capture.LauncherGreen");
+        ComponentName redAlias = new ComponentName(context, "com.emanuelef.remote_capture.LauncherRed");
+        // // הכנת ה-Intent שיפעיל את עצמנו מחדש
+        Intent restartIntent = context.getPackageManager().getLaunchIntentForPackage(getPackageName());
+        restartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        // // שימוש ב-PendingIntent עם FLAG_IMMUTABLE
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            context, 0, restartIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // // הגדרת ה-Alarm בדיוק לעוד שנייה אחת
+        AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, pendingIntent);
+        spe.putBoolean("needChange",false).commit();
+        // // ביצוע ההחלפה (זוכר את השרשור: מגן ירוק/אדום עם מנעול מוגבה)
+        if (isActive) {
+            pm.setComponentEnabledSetting(greenAlias, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+            pm.setComponentEnabledSetting(redAlias, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        } else {
+            pm.setComponentEnabledSetting(redAlias, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+            pm.setComponentEnabledSetting(greenAlias, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
+        
+        // // סגירה כפויה של התהליך כדי שהשינוי יתפוס בלאונצ'ר
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+    public void updateMdmUltimateStatus(boolean isProtected) {
+        ImageView shieldImg = findViewById(R.id.mdm_shield_view);
+        LayerDrawable layers = (LayerDrawable) shieldImg.getDrawable();
+
+        // // שליפת שכבות הצבע לשינוי (מילוי, מסגרת וחור מפתח)
+        Drawable fill = layers.findDrawableByLayerId(R.id.shield_fill);
+        Drawable stroke = layers.findDrawableByLayerId(R.id.shield_stroke);
+        Drawable keyhole = layers.findDrawableByLayerId(R.id.keyhole);
+
+        if (isProtected) {
+            // // מצב מוגן (ירוק)
+            int colorMain = 0xFF4CAF50;
+            int colorDark = 0xFF1B5E20;
+
+            fill.setColorFilter(colorMain, PorterDuff.Mode.SRC_ATOP);
+            stroke.setColorFilter(colorDark, PorterDuff.Mode.SRC_ATOP);
+            keyhole.setColorFilter(colorMain, PorterDuff.Mode.SRC_ATOP); // // החור הופך לירוק
+
+            // // הפעלת אנימציה "חיה מאוד": ציפה + נשימה + הבהוב פנימי
+            startUltimateAnimation(shieldImg, fill);
+
+            // // כאן תוכל להוסיף לוגיקת DevicePolicyManager פעילה //
+        } else {
+            // // מצב לא מוגן (אדום)
+            int colorMain = 0xFFE53935;
+            int colorDark = 0xFFB71C1C;
+            
+            fill.setColorFilter(colorMain, PorterDuff.Mode.SRC_ATOP);
+            stroke.setColorFilter(colorDark, PorterDuff.Mode.SRC_ATOP);
+            keyhole.setColorFilter(colorMain, PorterDuff.Mode.SRC_ATOP);
+
+            // // עצירת אנימציה וביצוע רעידת "אזהרה" קצרה
+            shieldImg.clearAnimation();
+            ObjectAnimator.ofFloat(shieldImg, "translationX", 0, 15, -15, 10, -10, 0).setDuration(500).start();
+
+            // // כאן תוכל להוסיף לוגיקת ביטול הגבלות //
+        }
+    }
+
+// // פונקציית האנימציה המורכבת: "חי מאוד" מכל הכיוונים
+    private void startUltimateAnimation(ImageView view, final Drawable innerFill) {
+        view.clearAnimation();
+
+        // // 1. אנימציה חיצונית: "נשימה" (גדילה/קטנה) ו"ציפה" (למעלה/למטה)
+        ObjectAnimator outerEffect = ObjectAnimator.ofPropertyValuesHolder(
+            view,
+            PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.07f),
+            PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.07f),
+            PropertyValuesHolder.ofFloat("translationY", 0f, -20f)
+        );
+        outerEffect.setDuration(1800);
+        outerEffect.setRepeatCount(ValueAnimator.INFINITE);
+        outerEffect.setRepeatMode(ValueAnimator.REVERSE);
+        outerEffect.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        // // 2. אנימציה פנימית: "הבהוב אנרגיה" (שינוי שקיפות המילוי ליצירת Glow)
+        ValueAnimator innerGlow = ValueAnimator.ofInt(180, 255);
+        innerGlow.setDuration(900);
+        innerGlow.setRepeatCount(ValueAnimator.INFINITE);
+        innerGlow.setRepeatMode(ValueAnimator.REVERSE);
+        innerGlow.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+
+                @Override
+                public void onAnimationUpdate(ValueAnimator anim) {
+
+                    innerFill.setAlpha((int) anim.getAnimatedValue());
+                }});
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(outerEffect, innerGlow);
+        animatorSet.start();
+    }
     private void refresh(){
         try{
         PasswordManager.pwopen=false;
@@ -394,6 +574,8 @@ public class MDMStatusActivity extends Activity {
         tvtlogin.setTextSize(20);
         tvtlogin.setGravity(Gravity.CENTER);
         } catch (Exception e) {}
+            checkAndFixLauncherIcon(mdmstate);
+            updateMdmUltimateStatus(mdmstate);
         if(mdmstate){
             try{
                 if(Build.VERSION.SDK_INT >= 24){
@@ -401,7 +583,12 @@ public class MDMStatusActivity extends Activity {
                     mDpm.setOrganizationName(mAdminComponentName,getResources().getString(R.string.pcapdroid_app_name));
                 }
             }catch (Exception e) {}
+            linlidenta.setVisibility(View.GONE);
+            linlidentb.setVisibility(View.GONE);
+            linlbefact.setVisibility(View.GONE);
+            linlactivatemult.setVisibility(View.GONE);
             linlactivate.setVisibility(View.GONE);
+            linlinfo.setVisibility(View.VISIBLE);
             linldetails.setVisibility(View.VISIBLE);
             tvroute.setText("המסלול הפעיל - "+AppState.getInstance().getCurrentPath().getDescription());
             boolean vpnenabled=false;
@@ -419,7 +606,57 @@ public class MDMStatusActivity extends Activity {
                 } catch (Exception e) {}
             }
         } else {
-            linlactivate.setVisibility(View.VISIBLE);
+            Button bunextorskip=findViewById(R.id.btn_next_start);
+            bunextorskip.setOnClickListener(new OnClickListener(){
+                    @Override
+                    public void onClick(View p1) {
+                        linlidenta.setVisibility(View.GONE);
+                        linlidentb.setVisibility(View.GONE);
+                        linlactivatemult.setVisibility(View.GONE);
+                        linlinfo.setVisibility(View.VISIBLE);
+                        linlactivate.setVisibility(View.VISIBLE);
+                    }
+                });
+            TextView buident= findViewById(R.id.welcomeidentify);
+            buident.setText("המכשיר שזוהה - "+//Build.BOARD+"\n"+
+                            "מכשיר="+Build.DEVICE+"\n"+
+                            //  Build.DISPLAY+"\n"+
+                            "מודל="+Build.MODEL+"\n"+
+                            "בראנד="+Build.BRAND+"\n"+
+                            "זיהוי="+Build.ID
+                            //     Build.BOOTLOADER+"\n"+
+                            
+
+                            );
+            String[] listidentmult={"Fanvace M36",
+                "s9863a1h10"+
+                "uis7865_6h10_go"};
+            boolean found= false;
+            String curdevice=Build.DEVICE;
+            for(String device:listidentmult){
+                if(curdevice.toLowerCase().equals(device.toLowerCase())){
+
+                    found=true;
+                    break;
+                }
+            }
+            
+            if(found){
+                buident.append("\nלמכשיר שלך יש אפשרות להפעיל את החסימה בלחצן אחד אחרי הכנת המכשיר! (-הפעלה למולטימדיה ועוד)");
+                linlactivatemult.setVisibility(View.VISIBLE);
+                bunextorskip.setText("בחירת סוג הפעלה ידנית");
+            }else{
+                buident.append("\nהמכשיר שלך לא נמצא כעת ברשימה שאפשר להפעיל עם לחצן אחד. תצטרך לבדוק איזה אפשרות מתאימה למכשיר שלך!"+"\n"+
+                               "אם כן הצלחת להפעיל עם הפעלה למולטימדיה - שלח את פרטי המכשיר שזוהו באמצעות שלח מייל (-שיש למעלה ב3 נקודות)");
+                linlactivatemult.setVisibility(View.GONE);
+                bunextorskip.setText("עבור לבחירת סוג ההפעלה");
+            }
+            
+            linlidenta.setVisibility(View.VISIBLE);
+            linlidentb.setVisibility(View.VISIBLE);
+            linlbefact.setVisibility(View.VISIBLE);
+            linlinfo.setVisibility(View.GONE);
+            linlactivate.setVisibility(View.GONE);
             linldetails.setVisibility(View.GONE);
         }
         }catch(Exception e){}
@@ -631,6 +868,10 @@ public class MDMStatusActivity extends Activity {
                     intent = new Intent(MDMStatusActivity.this, MDMSettingsActivity.class);
                     startActivity(intent);
                 }
+                return true;
+            case R.id.men_ite_store:
+                intent = new Intent(MDMStatusActivity.this, storeActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.men_ite_instruct:
                 intent = new Intent(MDMStatusActivity.this, InstructionsActivity.class);

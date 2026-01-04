@@ -102,6 +102,11 @@ public class activityadbpair extends Activity {
                                     i2++;
                                     ena="ena";
                                 }
+                                if(line.toLowerCase().contains("unauthorized")){
+                                    outputTextView.append("שגיאה - עדיין אין אישור להרצת adb מהמכשיר\n");
+                                    
+                                    err="unauthorized";
+                                }
                                 // גלילה אוטומטית לתחתית
                                 if (outputTextView != null && outputScrollView != null) {
                                     //outputTextView.append("Output: " + line + "\n");
@@ -121,7 +126,19 @@ public class activityadbpair extends Activity {
                             //Log.e(TAG, "(Error output): " + line);
                             if (outputTextView != null) {
                                 outputTextView.append("e: " + line + "\n");
-                                
+                                if(line.toLowerCase().contains("account")){
+                                    outputTextView.append("שגיאת חשבונות\n");
+                                    err="account";
+                                }else if(line.toLowerCase().contains("is already set")){
+                                    outputTextView.append("שגיאה - מכשיר כבר מוגדר\n");
+                                    err="already";
+                                }else if(line.toLowerCase().contains("already several users")){
+                                    outputTextView.append("שגיאה - למכשיר יש משתמשים מרובים\n");
+                                    err="users";
+                                }else if(line.toLowerCase().contains("java.lang.IllegalStateException")){
+                                    outputTextView.append("שגיאה - שגיאה לא מוכרת בינתיים\n");
+                                    err="Illegal";
+                                }
                                 if (outputTextView != null && outputScrollView != null) { // ודא ששניהם לא null
                                     //outputTextView.append("Output: " + line + "\n");
                                     
@@ -151,6 +168,22 @@ public class activityadbpair extends Activity {
                                 }
                                 if(act.equals("act")){
                                     outputTextView.append("\nהפעלה הצליחה");
+                                }
+                                
+                                if(err.equals("account")){
+                                    outputTextView.append("שגיאה - יש עדיין חשבונות במכשיר\n");
+                                    
+                                }else if(err.equals("already")){
+                                    outputTextView.append("שגיאה - מכשיר כבר מוגדר\n");
+                                    
+                                }else if(err.equals("users")){
+                                    outputTextView.append("שגיאה - למכשיר יש משתמשים מרובים\n");
+                                    
+                                }else if(err.equals("Illegal")){
+                                    outputTextView.append("שגיאה - שגיאה לא מוכרת בינתיים\n");
+                                   
+                                }else if(err.equals("unauthorized")){
+                                    outputTextView.append("שגיאה - עדיין אין אישור להרצת adb מהמכשיר\n");
                                 }
                                 if(ena.equals("ena")){
                                     outputTextView.append("\nהפעלת "+i2+" אפליקציות הצליח");
@@ -551,6 +584,7 @@ public class activityadbpair extends Activity {
     }
     
     void disactenaccmult(){
+        findViewById(R.id.act_adbpair_main).setVisibility(View.GONE);
         outputTextView.setText("מבצע פקודה...\n");
         // נטרל את הכפתור כדי למנוע לחיצות מרובות בזמן שהפקודה רצה
         buconmult.setEnabled(false);
@@ -634,6 +668,7 @@ public class activityadbpair extends Activity {
      String ena="";
     String dis="";
     String act="";
+    String err="";
     Process process = null;
     private void executeRootCommandInternal(final String command, final CommandOutputListener listener) {
         i=0;
@@ -641,6 +676,7 @@ public class activityadbpair extends Activity {
         ena="";
         dis="";
         act="";
+        err="";
         DataOutputStream os = null;
         final StringBuilder finalOutput = new StringBuilder();
         final StringBuilder finalErrorOutput = new StringBuilder();

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="בדיקת עדכונים לאפליקציות מותקנות"
+        android:key="update_check_category">
+
+        <Preference
+            android:key="select_system_apps"
+            android:title="בחר אפליקציות מערכת לעדכון"
+            android:summary="לחץ כדי לבחור אפליקציות מערכת (מותקנות מראש) שיופיעו ברשימה." />
+
+        <Preference
+            android:key="select_user_apps"
+            android:title="בחר אפליקציות משתמש לעדכון"
+            android:summary="לחץ כדי לבחור אפליקציות שהורדו (User Apps) שיופיעו ברשימה." />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="ניהול מקורות ורשימות"
+        android:key="source_list_category">
+        <Preference
+            android:key="source_priority_list"
+            android:title="סדר קדימות לבדיקת עדכונים"
+            android:summary="ערוך סדר קדימות של אתרים לבדיקת עדכונים לאפליקציות" />
+        <Preference
+            android:key="view_priority_list"
+            android:title="הצגת סדר קדימות לבדיקת עדכונים"
+            android:summary="הצגת סדר קדימות של אתרים לבדיקת עדכונים לאפליקציות" />
+        <!--EditTextPreference
+            android:key="source_priority_list"
+            android:title="סדר קדימות לבדיקת עדכונים"
+            android:summary="הכנס שמות מקורות (מופרדים בפסיקים, לדוגמה: FDroid, APKPure)"
+            android:defaultValue="FDroid, APKPure, Aptoide"
+            android:dialogTitle="ערוך סדר קדימות" /-->
+
+        <!--EditTextPreference
+            android:key="installed_apps_check_list"
+            android:title="רשימת אפליקציות לבדיקה (Combined List)"
+            android:summary="רשימת כל חבילות האפליקציות System User שנבחרו לעדכון."
+            android:defaultValue=""
+            android:dialogTitle="ערוך רשימה מאוחדת" /-->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="הגדרות ייבוא וייצוא"
+        android:key="import_export_category">
+        
+        <Preference
+            android:key="clear_all_items"
+            android:title="איפוס רשימת הפריטים"
+            android:summary="מחק את כל הפריטים השמורים במאגר המקומי." />
+            
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="הגדרות נוספות"
+        android:key="settings_category">
+
+        <SwitchPreference
+            android:key="visible_all"
+            android:title="הצג הכל"
+            android:summary="הצגת כל הפריטים גם אם אין להם עדכון." />
+        <!--SwitchPreference
+            android:key="clear_files"
+            android:title="מחיקת קבצי התקנה"
+            android:summary="מחיקת קבצי ההתקנה לאחר התקנתם" 
+            android:defaultValue="true"/-->
+    </PreferenceCategory>
+    
+</PreferenceScreen>

@@ -12,7 +12,10 @@ public class AboutActivitya extends Activity {
         super.onCreate(savedInstanceState);
         Utils.setTheme(this);
         setContentView(R.layout.activity_about);
-
+        try{
+            if(getActionBar().isShowing())
+                getActionBar().hide();
+        }catch(Exception e){}
         TextView tvAboutContent = findViewById(R.id.tv_about_content);
         tvAboutContent.setText("אפליקציית ניהול מכשירים (MDM)\n\n" +
                                "יישום זה נועד לסייע בניהול הגדרות המכשיר והאפליקציות וניהול תעבורת אינטרנט במכשירים מנוהלים. " +

@@ -149,6 +149,7 @@ try{
         }
         builder.apply();*/
         CaptureService.setdebug(Prefs.isdebug(PreferenceManager.getDefaultSharedPreferences(this)));
+        CaptureService.setisNetfree(Prefs.isNetfree(PreferenceManager.getDefaultSharedPreferences(this)));
         mInstance = new WeakReference<>(this);
         mLocalizedContext = createConfigurationContext(Utils.getLocalizedConfig(this));
         mIsUsharkAvailable = CaptureService.isUsharkAvailable(this);

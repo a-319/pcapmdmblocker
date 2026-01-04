@@ -180,7 +180,13 @@
             android:iconSpaceReserved="false"
             android:summary="@string/malware_detection_summary"
             android:defaultValue="true" />
-
+        
+        <SwitchPreference
+            android:key="netfree"
+            android:title="@string/netfree"
+            android:iconSpaceReserved="false"
+            android:summary="@string/netfree_sumarray"
+            android:defaultValue="false" />
         <!--Preference
             android:key="malware_detection_docs"
             android:title="@string/malware_detection_learn_more"

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:title="רענן"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_launch_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="הגדרות"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_add_item"
+        android:icon="@drawable/ic_add"
+        android:title="הוסף פריט"
+        android:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/menu_add_item_pn"
+                android:title="הוסף לפי שם חבילה" />
+            <item
+                android:id="@+id/menu_add_item_link"
+                android:title="הוסף קישור מותאם אישית" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/menu_import_export"
+        android:title="ייבוא / ייצוא"
+        android:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/menu_import_json"
+                android:title="ייבוא JSON (קובץ/קישור)" />
+            <item
+                android:id="@+id/menu_export_json"
+                android:title="ייצוא JSON" />
+        </menu>
+    </item>
+
+    
+</menu>

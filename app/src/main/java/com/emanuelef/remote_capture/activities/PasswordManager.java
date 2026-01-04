@@ -19,6 +19,9 @@ import java.util.Date;
 import com.emanuelef.remote_capture.R;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.text.InputType;
 
 public class PasswordManager {
     public static final String locksp="lock";
@@ -118,13 +121,28 @@ public class PasswordManager {
         
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle("אימות סיסמה");
+        
         final View passwordLayout = activity. getLayoutInflater().inflate(R.drawable.dialog_password_input, null);
+        final Switch swtype=passwordLayout.findViewById(R.id.swtype);
+        
         final android.widget.EditText etPassword = passwordLayout.findViewById(R.id.et_admin_password);
         final android.widget.ImageView showHidePassword = passwordLayout.findViewById(R.id.show_hide_password);
         final CheckBox cb =passwordLayout.findViewById(R.id.diCheckBox);
         cb.setVisibility(View.VISIBLE);
-        cb.setChecked(pwopen);
-        
+        cb.setChecked(true);
+        swtype.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+                @Override
+                public void onCheckedChanged(CompoundButton p1, boolean p2) {
+                    boolean isPwdType=etPassword.getTransformationMethod() instanceof PasswordTransformationMethod;
+                    if(p2){
+                        //etPassword.setInputType(129);
+                        etPassword.setInputType(InputType.TYPE_CLASS_TEXT| (isPwdType? InputType.TYPE_TEXT_VARIATION_PASSWORD:0));
+                    }else{
+                        //etPassword.setInputType(18);
+                        etPassword.setInputType(InputType.TYPE_CLASS_NUMBER| (isPwdType? InputType.TYPE_NUMBER_VARIATION_PASSWORD:0));
+                    }
+                }
+            });
         showHidePassword.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -187,10 +205,25 @@ public class PasswordManager {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle("שינוי סיסמת מנהל");
         final View passwordLayout = activity. getLayoutInflater().inflate(R.drawable.dialog_password_input, null); // השתמש באותו layout
+        final Switch swtype=passwordLayout.findViewById(R.id.swtype);
         final android.widget.EditText etNewPassword = passwordLayout.findViewById(R.id.et_admin_password);
         final android.widget.EditText etNewPasswordb = passwordLayout.findViewById(R.id.et_admin_passwordb);
         final android.widget.ImageView showHidePassword = passwordLayout.findViewById(R.id.show_hide_password);
         final android.widget.ImageView showHidePasswordb = passwordLayout.findViewById(R.id.show_hide_passwordb);
+        swtype.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+                @Override
+                public void onCheckedChanged(CompoundButton p1, boolean p2) {
+                    if(p2){
+                        etNewPassword.setInputType(129);
+                        etNewPasswordb.setInputType(129);
+                        //etPassword.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    }else{
+                        etNewPassword.setInputType(18);
+                        etNewPasswordb.setInputType(18);
+                        //etPassword.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                    }
+                }
+            });
         showHidePassword.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

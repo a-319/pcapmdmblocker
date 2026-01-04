@@ -12,7 +12,10 @@ public class InstructionsActivity extends Activity {
         super.onCreate(savedInstanceState);
         Utils.setTheme(this);
         setContentView(R.layout.activity_instructions);
-
+        try{
+            if(getActionBar().isShowing())
+                getActionBar().hide();
+        }catch(Exception e){}
         TextView tvInstructions = findViewById(R.id.tv_instructions_content);
         tvInstructions.setText("כאן יופיעו הוראות הפעלה מפורטות לשימוש באפליקציית ה-MDM...\n\n" +
                                "1. הפעלת מנהל מכשיר ,adb connect pair ,ברקוד רגיל ,ברקוד ממכשיר למכשיר ,שורש(חשוב מאוד להסיר את הרוט למניעת מעקפים.),...\n" +

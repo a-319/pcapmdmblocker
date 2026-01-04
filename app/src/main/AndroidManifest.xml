@@ -50,7 +50,7 @@
 
     <application
         android:name="com.emanuelef.remote_capture.PCAPdroid"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_launcher_red"
         android:label="@string/pcapdroid_app_name"
         android:roundIcon="@drawable/ic_launcher_round"
         android:banner="@drawable/banner"
@@ -241,11 +241,38 @@
             android:name="com.emanuelef.remote_capture.activities.MDMStatusActivity"
             android:theme="@style/AppThemeReg"
             android:exported="true">
+            <!--intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter-->
+        </activity>
+        
+
+        <activity-alias
+            android:name="com.emanuelef.remote_capture.LauncherGreen"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_green"
+            
+            android:targetActivity="com.emanuelef.remote_capture.activities.MDMStatusActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity-alias
+            android:name="com.emanuelef.remote_capture.LauncherRed"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_red"
+            
+            android:targetActivity="com.emanuelef.remote_capture.activities.MDMStatusActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
         <activity android:name="com.emanuelef.remote_capture.activities.MDMSettingsActivity" />
         <activity android:name="com.emanuelef.remote_capture.activities.RestrictionManagementActivity" />
         <activity android:name="com.emanuelef.remote_capture.activities.MoreFeaturesActivity" />
@@ -274,6 +301,32 @@
         </receiver>
         <receiver android:name="com.emanuelef.remote_capture.activities.PairingReceiver"
             android:exported="false" />
+        
+        <activity android:name="com.mdm.activities.confirmationinstall"/>
+        <activity android:name="com.mdm.activities.storeActivity"/>
+        <activity android:name="com.mdm.activities.storeSettingsActivity"/>
+        <receiver
+            android:name="com.mdm.activities.InstallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.mdm.activities.ACTION_INSTALL_COMPLETE" />
+            </intent-filter>
+        </receiver>
+        <activity 
+            android:name="com.emanuelef.remote_capture.activities.AuthActivity" 
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" 
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:windowSoftInputMode="stateVisible"
+            android:launchMode="singleInstance" />
+        <receiver android:name="com.emanuelef.remote_capture.activities.MyToggleWidget" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
     </application>
 
     <!--application

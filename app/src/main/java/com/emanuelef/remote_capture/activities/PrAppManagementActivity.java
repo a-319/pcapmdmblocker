@@ -44,24 +44,25 @@ import com.emanuelef.remote_capture.Utils;
 import android.content.SharedPreferences;
 import java.util.Set;
 import android.preference.PreferenceManager;
+import android.appwidget.AppWidgetManager;
 
 @Deprecated
 public class PrAppManagementActivity extends Activity {
 
-    private DevicePolicyManager mDpm;
-    private ComponentName mAdminComponentName;
+    private static DevicePolicyManager mDpm;
+    private static ComponentName mAdminComponentName;
     private ListView lvApps;
-    private List<AppItem> mOriginalAppList;
-    private List<AppItem> mFilteredAppList;
-    private PrAppListAdapter mAdapter;
+    private static List<AppItem> mOriginalAppList;
+    private static List<AppItem> mFilteredAppList;
+    private static PrAppListAdapter mAdapter;
 
     // משתנים לשמירת מצב הסינון והמיון הנוכחי
-    private String currentSearchText = "";
-    private String currentSearchPackage = ""; // לחיפוש לפי שם חבילה
-    private int currentFilterOptionId = R.id.rb_filter_all_dialog; // ID של כפתור הרדיו הנבחר
-    private int currentSortOptionId = R.id.rb_sort_name_dialog; // ID של כפתור הרדיו הנבחר
+    private static String currentSearchText = "";
+    private static String currentSearchPackage = ""; // לחיפוש לפי שם חבילה
+    private static int currentFilterOptionId = R.id.rb_filter_all_dialog; // ID של כפתור הרדיו הנבחר
+    private static int currentSortOptionId = R.id.rb_sort_name_dialog; // ID של כפתור הרדיו הנבחר
    
-    private ProgressDialog progressDialog; // משתנה לדיאלוג התקדמות
+    private static ProgressDialog progressDialog; // משתנה לדיאלוג התקדמות
     
     private static final int PICK_APK_REQUEST_CODE = 101;
     
@@ -81,7 +82,7 @@ public class PrAppManagementActivity extends Activity {
         lvApps = (ListView) findViewById(R.id.lv_apps);
 
         // טען את הרשימה באופן אסינכרוני
-        new LoadAppsTask().execute();
+        new LoadAppsTask(this).execute();
 
         mFilteredAppList = new ArrayList<AppItem>();
         mAdapter = new PrAppListAdapter(this, mFilteredAppList);
@@ -98,7 +99,7 @@ public class PrAppManagementActivity extends Activity {
         btnRefreshApps.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new LoadAppsTask().execute();
+                    new LoadAppsTask(PrAppManagementActivity.this).execute();
                     //Toast.makeText(PrAppManagementActivity.this, "רשימת אפליקציות עודכנה.", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -110,7 +111,7 @@ public class PrAppManagementActivity extends Activity {
                             @Override
                             public void run() {
                                 try{
-                                    applyAppVisibilityChanges();
+                                    applyAppVisibilityChanges(PrAppManagementActivity.this);
                                 }catch(Exception e){
                                     LogUtil.logToFile(e.toString());
                                 }
@@ -144,7 +145,7 @@ public class PrAppManagementActivity extends Activity {
                                 @Override
                                 public void run() {
                                     try{
-                                        enadisapps(false);
+                                        enadisapps(PrAppManagementActivity.this,false,false);
                                     }catch(Exception e){}
                                 }
                             },PrAppManagementActivity.this);
@@ -160,7 +161,7 @@ public class PrAppManagementActivity extends Activity {
                                 @Override
                                 public void run() {
                                     try{
-                                        enadisapps(true);
+                                        enadisapps(PrAppManagementActivity.this,true,false);
                                     }catch(Exception e){}
                                 }
                             },PrAppManagementActivity.this);
@@ -171,13 +172,16 @@ public class PrAppManagementActivity extends Activity {
 
     // הוסף AsyncTask חדש לטעינת אפליקציות
     @Deprecated
-    private class LoadAppsTask extends AsyncTask<Void, Void, List<AppItem>> {
-        
+    private static class LoadAppsTask extends AsyncTask<Void, Void, List<AppItem>> {
+        Context mcontext;
+        LoadAppsTask(Context mcontext){
+            this.mcontext=mcontext;
+        }
         @Deprecated
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressDialog = new ProgressDialog(PrAppManagementActivity.this);
+            progressDialog = new ProgressDialog(mcontext);
             progressDialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_button_background);
             progressDialog.setMessage("טוען רשימת אפליקציות משתמש...");
             progressDialog.setCancelable(false);
@@ -186,7 +190,7 @@ public class PrAppManagementActivity extends Activity {
 
         @Override
         protected List<AppItem> doInBackground(Void... voids) {
-            PackageManager pm = getPackageManager();
+            PackageManager pm = mcontext.getPackageManager();
             List<ApplicationInfo> installedApps = pm.getInstalledApplications(PackageManager.GET_META_DATA | PackageManager.MATCH_UNINSTALLED_PACKAGES);
             List<AppItem> appList = new ArrayList<AppItem>();
 
@@ -298,7 +302,7 @@ public class PrAppManagementActivity extends Activity {
         builder.show();
     }
 
-    private void applyFiltersAndSort() {
+    private static void applyFiltersAndSort() {
         mFilteredAppList.clear();
         String searchTextLower = currentSearchText.toLowerCase();
         String searchPackageLower = currentSearchPackage.toLowerCase(); // טקסט חיפוש חבילה ב-lowercase
@@ -368,7 +372,7 @@ public class PrAppManagementActivity extends Activity {
     }
 
     
-    private boolean hasLauncherIcon(PackageManager pm, String packageName) {
+    private static boolean hasLauncherIcon(PackageManager pm, String packageName) {
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         List<android.content.pm.ResolveInfo> resolveInfoList = pm.queryIntentActivities(intent, 0);
@@ -381,8 +385,8 @@ public class PrAppManagementActivity extends Activity {
     }
 
     
-    final private String msetapps="setapps";
-    private void applyAppVisibilityChanges() {
+    final private static String msetapps="setapps";
+    private void applyAppVisibilityChanges(Context mcontext) {
         List<String> ss=new ArrayList<>();
         
         for (AppItem appItem : mOriginalAppList) { // עבר על הרשימה המקורית
@@ -401,21 +405,47 @@ public class PrAppManagementActivity extends Activity {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(PrAppManagementActivity.this).edit();
         editor.putStringSet(msetapps, s).commit();
         Toast.makeText(getApplicationContext(), "שינויים באפליקציות נשמרו!", Toast.LENGTH_SHORT).show();
-        new LoadAppsTask().execute();
+        new LoadAppsTask(mcontext).execute();
         applyFiltersAndSort(); // סנן ומיין אותה מחדש
     }
     
-    private void enadisapps(boolean enadis){
+    public static void enadisapps(Context mcontext,boolean enadis,boolean fromWidget){
         Set<String> s= Set.of();
-        SharedPreferences mpref= PreferenceManager.getDefaultSharedPreferences(PrAppManagementActivity.this);
+        SharedPreferences mpref= PreferenceManager.getDefaultSharedPreferences(mcontext);
         s=mpref.getStringSet(msetapps, s);
+        if(fromWidget){
+            mDpm = (DevicePolicyManager) mcontext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            mAdminComponentName = new ComponentName(mcontext, admin.class);
+        }
         for(String pn:s){
             mDpm.setApplicationHidden(mAdminComponentName, pn, enadis);
         }
+        syncAllWidgets(mcontext,enadis);
         String mstat=enadis?"אפליקציות הושבתו!":"אפליקציות הופעלו!";
-        Toast.makeText(getApplicationContext(), mstat, Toast.LENGTH_SHORT).show();
-        new LoadAppsTask().execute();
+        Toast.makeText(mcontext.getApplicationContext(), mstat, Toast.LENGTH_SHORT).show();
+        if(!fromWidget){
+        new LoadAppsTask(mcontext).execute();
         applyFiltersAndSort();
+        }
+        
     }
-    
+    private static void syncAllWidgets(Context mcontext,boolean newValue) {
+        // // 1. שמירת המצב החדש ב-SharedPreferences (כדי שהווידג'טים יקראו אותו)
+        mcontext.getSharedPreferences("WidgetPrefs", MODE_PRIVATE)
+            .edit()
+            .putBoolean("is_locked", newValue)
+            .commit();
+
+        // // 2. יצירת Intent שאומר למערכת: "תעדכן את כל הווידג'טים של MyToggleWidget"
+        Intent intent = new Intent(mcontext, MyToggleWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+
+        // // 3. שליפת כל ה-IDs הקיימים של הווידג'טים מהסוג הזה
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(mcontext);
+        int[] ids = widgetManager.getAppWidgetIds(new ComponentName(mcontext, MyToggleWidget.class));
+
+        // // 4. צירוף ה-IDs ל-Intent ושליחת השידור (Broadcast)
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        mcontext.sendBroadcast(intent);
+    }
 }

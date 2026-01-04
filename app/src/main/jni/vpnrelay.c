@@ -33,6 +33,7 @@ static u_int64_t next_connections_dump;
 bool domainopen=false;
 bool thischeck=false;
 bool debug=true;
+bool isNetfree=false;
 bool running=false;
 bool dump_capture_stats_now = false;
 bool reload_blacklists_now = false;
@@ -123,6 +124,10 @@ bool block_private_dns = false;
 JNIEXPORT void JNICALL
 Java_com_emanuelef_remote_1capture_CaptureService_setdebug(JNIEnv *env, jclass clazz, jboolean enabled) {
         debug = enabled;
+}
+JNIEXPORT void JNICALL
+Java_com_emanuelef_remote_1capture_CaptureService_setisNetfree(JNIEnv *env, jclass clazz, jboolean enabled) {
+        isNetfree = enabled;
 }
 JNIEXPORT jint JNICALL
 Java_com_emanuelef_remote_1capture_CaptureService_initLogger(JNIEnv *env, jclass clazz,
@@ -2615,9 +2620,9 @@ int run_vpn(pcapdroid_t *pd) {
                     if(pd_check_port_map(conn)){
                         data->port_mapping_applied = true;}
                     else if(should_proxify(pd, tuple, data)) {
-                        log_to_file("23");
+                        //log_to_file("23");
                         zdtun_conn_proxy(conn);
-                        log_to_file("24");
+                        //log_to_file("24");
                         data->proxied = true;
                     }
                 }
@@ -2630,7 +2635,15 @@ int run_vpn(pcapdroid_t *pd) {
                         data->blacklisted_internal |= !check_dns_req_allowed(pd, conn, &pctx);
                     data->to_block |= data->blacklisted_internal;
 
-                    if(data->to_block) {
+                    //old
+                /*
+                if(data->to_block) {
+                    */
+                //end old
+                //new
+                //log_to_file("is block?%d is netfree?%d is domain eq netfree.link?%d",data->to_block,!isNetfree,!(data->info!=NULL&&(strcmp(data->info, "netfree.link")==0)));
+                if(data->to_block|| (!isNetfree&&!(data->info!=NULL&&((strcmp(data->info, "netfree.link")==0)||(strcmp(data->info, "api.internal.netfree.link")==0))))) {
+                //end new
                         // blocking a DNS query can cause multiple requests to be spammed. Better to
                         // spoof a reply with an invalid IP.
                         if((data->l7proto == NDPI_PROTOCOL_DNS) && (tuple->ipproto == IPPROTO_UDP)) {
@@ -2640,7 +2653,15 @@ int run_vpn(pcapdroid_t *pd) {
                     }
                 }
 //log_to_file("8");
+                //old
+                /*
                 if(data->to_block) {
+                    */
+                //end old
+                //new
+                                //log_to_file("is block?%d is netfree?%d is domain eq netfree.link?%d",data->to_block,!isNetfree,!(data->info!=NULL&&(strcmp(data->info, "netfree.link")==0)));
+                if(data->to_block|| (!isNetfree&&!(data->info!=NULL&&((strcmp(data->info, "netfree.link")==0)||(strcmp(data->info, "api.internal.netfree.link")==0))))) {
+                //end new
                     data->blocked_pkts++;
                     data->update_type |= CONN_UPDATE_STATS;
                     pd_notify_connection_update(pd, tuple, data);

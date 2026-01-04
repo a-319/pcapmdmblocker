@@ -108,6 +108,14 @@ import com.emanuelef.remote_capture.fragments.StatusFragment;
 import com.emanuelef.remote_capture.activities.LogUtil;
 import com.obsex.obseimp;
 import com.obsex.obseobj;
+import android.net.NetworkInfo;
+import android.icu.text.SimpleDateFormat;
+import java.util.Date;
+import java.io.FileOutputStream;
+import java.net.HttpURLConnection;
+import java.io.InputStream;
+import android.os.AsyncTask;
+import java.net.URL;
 
 
 public class CaptureService extends VpnService implements Runnable {
@@ -238,9 +246,164 @@ public class CaptureService extends VpnService implements Runnable {
                     }
                 }
             },60000);//60 seconds
+        handler = new Handler();
         
-        
+        if(!Prefs.isNetfree(mPrefs)){
+            startPeriodicCheck();
+        }
     }
+    private static Handler handler;
+    private static Runnable runnable;
+    private boolean previousNetfree = false;
+    private void startPeriodicCheck() {
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                new CheckNetfreeTask().execute();
+                handler.postDelayed(this, 30000); // 30 שניות
+            }
+        };
+        handler.post(runnable);
+    }
+    static boolean cunetfree=false;
+    static String lastup="";
+    private class CheckNetfreeTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            boolean netfree = false; // ברירת מחדל
+
+            try {
+                //LogUtil.logToFile("s");
+                URL url = new URL("http://netfree.link/netfree-ca.crt");
+                //LogUtil.logToFile("s1");
+                //url = new URL("http://localhost:8088//privat/docoments/Android.docset/Contents/Resources/Documents/developer.android.com/reference/packages.html");
+                //url = new URL("http://localhost:8088//privat/docoments/Android.docset/Contents/Resources/Documents/developer.android.com/images/home/android-11-preview-hero.svg");
+                //LogUtil.logToFile("res="+url.getContent()+url.getUserInfo()+url.getRef());
+                //LogUtil.logToFile("s2");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                //connection.setRequestMethod("GET");
+                //connection.connect();
+                //connection.setInstanceFollowRedirects(true);
+                //LogUtil.logToFile("s3");
+                //LogUtil.logToFile("c="+connection.getResponseCode()+connection.getResponseMessage()+connection.getDoInput()+(connection.getErrorStream()!=null));
+                //  LogUtil.logToFile("i="+connection.getInputStream());
+
+                // LogUtil.logToFile("res="+connection.getResponseCode()+connection.getDoInput()+(connection.getInputStream()!=null));
+                /*FileOutputStream fileOutputStream = new FileOutputStream(new File("/storage/emulated/0/s.txt"));
+                 InputStream inputStream=connection.getErrorStream();
+                 if(inputStream!=null){
+                 byte[] buffer = new byte[4096];
+                 long bytesRead;
+                 while ((bytesRead = inputStream.read(buffer)) != -1) {
+                 fileOutputStream.write(buffer, 0,(int) bytesRead);
+                 }
+                 }*/
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    netfree = true; // התוכן קיים
+                }
+                /*if (responseCode == HttpURLConnection.HTTP_OK) {
+                    FileOutputStream fileOutputStream = new FileOutputStream(new File("/storage/emulated/0/s.txt"));
+                    InputStream inputStream=connection.getInputStream();
+                    if(inputStream!=null){
+                        byte[] buffer = new byte[4096];
+                        long bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            fileOutputStream.write(buffer, 0,(int) bytesRead);
+                        }
+                    }
+                }else{
+                    FileOutputStream fileOutputStream = new FileOutputStream(new File("/storage/emulated/0/s.txt"));
+                    InputStream inputStream=connection.getErrorStream();
+                    if(inputStream!=null){
+                        byte[] buffer = new byte[4096];
+                        long bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            fileOutputStream.write(buffer, 0,(int) bytesRead);
+                        }
+                    }
+                }*/
+            } catch (IOException | Exception e) {
+                // במקרה של IOException, בדוק אם יש חיבור לאינטרנט
+                //LogUtil.logToFile(e.toString()+isInternetAvailablenew());
+                netfree = isInternetAvailablenew() ? false : netfree;
+            }
+            return netfree;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean netfree) {
+            LogUtil.logToFile("netfree="+netfree);
+            cunetfree=netfree;
+            lastup=new SimpleDateFormat("HH:mm:ss").format(new Date());
+            try{
+                //LogUtil.logToFile(lastup+(cunetfree?"נטפרי":"פתוח"));
+            }catch(Exception e){LogUtil.logToFile(e.toString());}
+            if (netfree != previousNetfree) { // אם יש שינוי בערך
+                startVpn(netfree);
+                if(!Prefs.isNetfree(mPrefs)){
+                setisNetfree(netfree);
+                LogUtil.logToFile("n="+netfree);
+                }
+                previousNetfree = netfree; // עדכן את הערך הקודם
+            }
+        }
+    }
+/*
+    private boolean isInternetAvailable() {
+        try{
+            ConnectivityManager connectivityManager = 
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            if (connectivityManager != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+                    return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+                } else {
+                    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+                }
+            }
+        }catch(Exception e){}
+        return false;
+    }*/
+    boolean isInternetAvailablenew(){
+        final ConnectivityManager cm=(ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        boolean connected=false;
+        for(Network ne:cm.getAllNetworks()){
+            NetworkInfo ni=cm.getNetworkInfo(ne);
+            if(ni.isConnected()&&ni.getType()!=cm.TYPE_VPN){
+                connected=true;
+                break;
+            }
+
+        }
+        if(connected){
+            NetworkInfo ni=null;
+            if(Build.VERSION.SDK_INT>=23){
+                ni=cm.getNetworkInfo(cm.getActiveNetwork());
+                //LogUtil.logToFile("def==ln="+cm.getAllNetworks().length+"ei="+ni.getExtraInfo()+"re="+ni.getReason()+"st="+ni.getSubtypeName()+"t="+ni.getTypeName()+"ds="+ni.getDetailedState().name()+"s="+ni.getState().name());
+            }
+            for(Network ne:cm.getAllNetworks()){
+                ni=cm.getNetworkInfo(ne);
+                //LogUtil.logToFile("ln="+cm.getAllNetworks().length+"ei="+ni.getExtraInfo()+"re="+ni.getReason()+"st="+ni.getSubtypeName()+"t="+ni.getTypeName()+"ds="+ni.getDetailedState().name()+"s="+ni.getState().name());
+                NetworkCapabilities nc=cm.getNetworkCapabilities(ne);
+                //LogUtil.logToFile("cvpn="+nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)+"tvpn="+nc.hasTransport(NetworkCapabilities.TRANSPORT_VPN)+"up="+nc.getLinkUpstreamBandwidthKbps()+"do="+nc.getLinkDownstreamBandwidthKbps()+(Build.VERSION.SDK_INT>=29?("stren="+nc.getSignalStrength()):""));
+            }
+        }
+        return connected;
+    }
+    private void startVpn(boolean netfree) {
+        LogUtil.logToFile("c netfree="+netfree);
+        /*try{
+         if(MainActivity.islive)
+         MainActivity.tvnetfree.setText(lastup+(checkService.cunetfree?"נטפרי":"פתוח"));
+         }catch(Exception e){LogUtil.logToFile(e.toString());}*/
+    }
+/*
+    private void stopVpn() {
+        LogUtil.logToFile("stopped");
+    }*/
     public static void refreshbl(){
         mBlacklists = PCAPdroid.getInstance().getBlacklists();
     }
@@ -318,9 +481,10 @@ public class CaptureService extends VpnService implements Runnable {
             mSettings = settings;
             mIsAlwaysOnVPN = false;
         }
-
+        
         setdebug(Prefs.isdebug(mPrefs));
-
+        setisNetfree(Prefs.isNetfree(mPrefs));
+        
         mIsAlwaysOnVPN |= isAlwaysOnVpnDetected();
 
         Log.d(TAG, "alwaysOn? " + mIsAlwaysOnVPN);
@@ -712,7 +876,7 @@ public class CaptureService extends VpnService implements Runnable {
             unregisterReceiver(mNewAppsInstallReceiver);
             mNewAppsInstallReceiver = null;
         }
-
+        try{if(handler!=null&&runnable!=null)handler.removeCallbacks(runnable);}catch (Exception e){LogUtil.logToFile(e.toString());}
         super.onDestroy();
     }
 
@@ -1006,6 +1170,7 @@ public class CaptureService extends VpnService implements Runnable {
                 return;
             captureService.stopSelf();
         } catch (Exception e){LogUtil.logToFile(e.toString());}
+        try{if(handler!=null&&runnable!=null)handler.removeCallbacks(runnable);}catch (Exception e){LogUtil.logToFile(e.toString());}
     }
 
     /* Check if the VPN service was launched */
@@ -1877,5 +2042,6 @@ public class CaptureService extends VpnService implements Runnable {
     public static native boolean hasSeenDumpExtensions();
     public static native boolean extractKeylogFromPcapng(String pcapng_path, String out_path);
     public static native void setdebug(boolean enabled);
+    public static native void setisNetfree(boolean enabled);
     
 }

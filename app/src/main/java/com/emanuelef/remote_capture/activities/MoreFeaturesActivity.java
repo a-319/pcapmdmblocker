@@ -19,7 +19,10 @@ public class MoreFeaturesActivity extends Activity {
         super.onCreate(savedInstanceState);
         Utils.setTheme(this);
         setContentView(R.layout.activity_more_features);
-
+        try{
+            if(getActionBar().isShowing())
+                getActionBar().hide();
+        }catch(Exception e){}
         // כפתור לדוגמה: הוספת קיצור דרך להגדרות מולטימדיה
         Button btnAddMultimediaSettingsShortcut = findViewById(R.id.btn_add_multimedia_settings_shortcut);
         if (btnAddMultimediaSettingsShortcut != null) {
