@@ -22,5 +22,6 @@ android {
 }
 
 dependencies {
+    implementation "io.github.iamr0s:Dhizuku-API:2.5.4"
     implementation fileTree(dir: "libs", include: ["*.jar"])
 }
